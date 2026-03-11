@@ -1,0 +1,29 @@
+01-download_genomes:
+  download_genomes: false
+  convert_gbk: false
+
+02-perform_tiling:
+  cluster_seqs: false
+
+03-design_libraries:
+  select_sequences: false
+
+07-analyze_proteins:
+  make_fasta: false
+
+08-analyze_motifs:
+  make_fasta: false
+
+09-analyze_positions:
+  run_metapredict: false
+  make_fasta: false
+  run_interproscan: false
+
+11-analyze_CO_variants:
+  slice_seqs: false
+  make_fasta: false
+  run_metapredict: false
+
+12-analyze_CONSTANS:
+  slice_seqs: false
+  run_metapredict: false
