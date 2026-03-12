@@ -40,8 +40,9 @@ if select_sequences:
     selected_df = library_df.loc[indicies]
     remaining_df = library_df[~library_df.index.isin(indicies)]
 
+select_controls = _config.get("select_controls", False)
 out_file = f'{LIBRARY_DIR}/viral_controls.csv'
-if not os.path.isfile(out_file):
+if select_controls:
     controls_df = pd.concat([
     pd.read_csv(f'{METADATA_DIR}/controls/validated_virus_tiles-1.csv',sep=';')[['gBlockname','DNA']].rename(columns={'gBlockname':'tile_ID','DNA':'na_seq'}),
     pd.read_csv(f'{METADATA_DIR}/controls/activator_tile_sequences.csv',sep=';')[['Tile ID','Sequence']].rename(columns={'Tile ID':'tile_ID','Sequence':'na_seq'})
@@ -54,10 +55,10 @@ if not os.path.isfile(out_file):
     controls_df.to_csv(out_file,index=False)
 else:
     controls_df = pd.read_csv(out_file)
-controls_df.head()
 
+output_orders = _config.get("output_orders", False)
 out_file = f'{LIBRARY_DIR}/eLW044-fLW134_twist_order.csv'
-if not os.path.isfile(out_file):
+if output_orders:
     lib_500_df = pd.concat([
         selected_df,
         remaining_df.nlargest(250,'PADDLE_zscore'),
@@ -69,10 +70,9 @@ if not os.path.isfile(out_file):
     lib_500_df.to_csv(out_file,index=False)
 else:
     lib_500_df = pd.read_csv(out_file)
-lib_500_df.head()
 
 out_file = f'{LIBRARY_DIR}/eLW044-fLW135_twist_order.csv'
-if not os.path.isfile(out_file):
+if output_orders:
     lib_1000_df = pd.concat([
         selected_df,
         remaining_df.nlargest(705,'PADDLE_zscore'),
@@ -84,7 +84,6 @@ if not os.path.isfile(out_file):
     lib_1000_df.to_csv(out_file,index=False)
 else:
     lib_1000_df = pd.read_csv(out_file)
-lib_1000_df.head()
 
 lib_250 = set(pd.read_csv(f'{LIBRARY_DIR}/eLW044-fLW133_twist_order.csv')['na_seq+overhangs'])
 lib_500 = set(lib_500_df['na_seq+overhangs'])

@@ -1,6 +1,7 @@
-# # import experimental data
+# import experimental data
 
 import json
+import os
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -30,7 +31,7 @@ if make_fasta:
         for idx,row in activator_df.drop_duplicates('tile').iterrows():
             out_file.write(f'>{row["tile_ID"]}\n{row["tile"]}\n')
 
-# # find motifs
+# find motifs
 
 result = find_motifs(list(activator_df['tile'].unique()),k=3)
 kmer_df = pd.DataFrame(result).fillna(0.0).T.sum().reset_index()
@@ -54,7 +55,7 @@ g.set(xlabel='Count',ylabel='k-mer',ymargin=0.005)
 if SAVE_FIGURES:
     plt.savefig(f'{FIGURE_DIR}/{SCRIPT_ID}-library_5mers.svg',**FIG_PARAMS)
 
-# # compare to known motifs
+# compare to known motifs
 
 relaxed_motifs_df = pd.read_csv(f'{METADATA_DIR}/relaxed_plant_repression_motifs.csv').drop(columns=['Unnamed: 0']).drop_duplicates()
 relaxed_motifs_df['Library'] = relaxed_motifs_df['0'].apply(lambda x: lookup_motif(x, data_df['tile'].unique()))

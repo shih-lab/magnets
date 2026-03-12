@@ -1,14 +1,30 @@
+save_figures: true
+
 01-download_genomes:
+  download_metadata: false
   download_genomes: false
+  scan_seq_clustering: false
   convert_gbk: false
 
 02-perform_tiling:
   cluster_seqs: false
+  import_seqs: false
+  make_tiles: false
+  design_libraries: false
 
 03-design_libraries:
+  select_controls: false
   select_sequences: false
+  output_orders: false
+
+04-evaluate_normalization:
+  import_empirical_data: false
+
+05-fit_sigmoid:
+  output_fitted_data: false
 
 07-analyze_proteins:
+  import_empirical_data: false
   make_fasta: false
 
 08-analyze_motifs:
@@ -18,6 +34,7 @@
   run_metapredict: false
   make_fasta: false
   run_interproscan: false
+  output_positional_data: false
 
 11-analyze_CO_variants:
   slice_seqs: false

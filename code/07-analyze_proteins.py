@@ -1,6 +1,7 @@
-# # import experimental data
+# import experimental data
 
 import json
+import os
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -13,7 +14,7 @@ from globals import (
 SCRIPT_ID = '07'
 _config = json.loads(os.environ.get("SCRIPT_CONFIG", "{}"))
 
-# # go term analysis
+# go term analysis
 
 data_df = pd.read_csv(f'{ANALYSIS_DIR}/experimental_data_fitted.csv')
 tiles_df = pd.read_csv(f'{TILE_DIR}/viral_tiles.csv')
@@ -24,7 +25,7 @@ make_fasta = _config.get("make_fasta", False)
 if make_fasta:
     with open(f'{ANALYSIS_DIR}/viral_proteins.faa','w') as out_file:
         for _,row in protein_df.iterrows():
-            out_file.write(f'>{row["description"]}\n{row["aa_seq"]}\n')
+            out_file.write(f'>{row["protein_ID"]}\n{row["aa_seq"]}\n')
     with open(f'{ANALYSIS_DIR}/viral_tiles.faa','w') as out_file:
         for _,row in tiles_df.iterrows():
             out_file.write(f'>{row["tile_ID"]}\n{row["tile"]}\n')
@@ -56,6 +57,7 @@ tmp_df['COG_category'] = tmp_df['COG_category'].map({'A':'RNA processing and mod
 plt.figure(figsize=(2,1))
 g = sns.barplot(data=tmp_df,y='COG_category',x='library_ID',color='grey',edgecolor='black',linewidth=0.5)
 g.set(xlabel='Count',ylabel='COG Category',ymargin=0.025)
+
 if SAVE_FIGURES:
     plt.savefig(f'{FIGURE_DIR}/{SCRIPT_ID}-go_terms_overall_category.svg',**FIG_PARAMS)
 

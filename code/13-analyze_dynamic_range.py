@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import seaborn as sns
+import matplotlib.colormaps as colormaps
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 from sklearn.preprocessing import StandardScaler
 from globals import METADATA_DIR, EXPERIMENT_DIR, FIGURE_DIR, SAVE_FIGURES
@@ -27,32 +27,34 @@ print(f"ENTRAP-seq all libraries dynamic range: {all_entrapseq_df['mean_scaled']
 print(f"Ludwig et al. all libraries dynamic range: {all_ludwig_df['mean_scaled'].max() - all_ludwig_df['mean_scaled'].min():.3f}")
 
 df = pd.read_excel(f'{METADATA_DIR}/1-s2.0-S2405471223001527-mmc2.xlsx',sheet_name='vTR-CoV Tiling Activation').dropna(subset='Library')
-ludwig_df = None
+ludwig_dfs = []
 for dataset in df['Library'].unique():
     tmp_df = df.query(f'Library == "{dataset}"').copy()
     tmp_df = remove_outliers(tmp_df, 'Avg')
     tmp_df['mean_scaled'] = StandardScaler().fit_transform(tmp_df['Avg'].to_numpy().reshape(-1,1))
-    ludwig_df = pd.concat([ludwig_df, tmp_df]).reset_index(drop=True)
+    ludwig_dfs.append(tmp_df)
+ludwig_df = pd.concat(ludwig_dfs).reset_index(drop=True)
 
 for dataset in ludwig_df['Library'].unique():
     tmp_df = ludwig_df.query(f'Library == "{dataset}"')
     print(f"Ludwig et al. {dataset} dynamic range: {tmp_df['mean_scaled'].max() - tmp_df['mean_scaled'].min():.3f}")
 
 df = pd.read_csv(f'{EXPERIMENT_DIR}/experimental_data.csv')
-entrapseq_df = None
+entrapseq_dfs = []
 for dataset in df['dataset'].unique():
     tmp_df = df.query(f'dataset == "{dataset}"').copy()
     tmp_df['ratio_mean'] = tmp_df[['ratio_rep1','ratio_rep2']].mean(axis=1)
     tmp_df = remove_outliers(tmp_df, 'ratio_mean')
     tmp_df['mean_scaled'] = StandardScaler().fit_transform(tmp_df['ratio_mean'].to_numpy().reshape(-1,1))
-    entrapseq_df = pd.concat([entrapseq_df, tmp_df]).reset_index(drop=True)
+    entrapseq_dfs.append(tmp_df)
+entrapseq_df = pd.concat(entrapseq_dfs).reset_index(drop=True)
 
 for dataset in df['dataset'].unique():
     tmp_df = entrapseq_df.query(f'dataset == "{dataset}"')
     print(f"ENTRAP-seq {dataset} library dynamic range: {tmp_df['mean_scaled'].max() - tmp_df['mean_scaled'].min():.3f}")
 
 n_colors = 4  
-cmap = cm.get_cmap("Blues")
+cmap = colormaps.colormap["Blues"]
 sample_points = np.linspace(0.3, 1.0, n_colors)
 colors = [cmap(p) for p in sample_points]
 palette = [mcolors.to_hex(c) for c in colors]
@@ -86,4 +88,5 @@ for ax, label in zip(axes, labels):
 
 plt.tight_layout()
 
-plt.savefig(f'{FIGURE_DIR}/{SCRIPT_ID}-dynamic_range_zscore.png',bbox_inches='tight',transparent=False,dpi=800)
+if SAVE_FIGURES:
+    plt.savefig(f'{FIGURE_DIR}/{SCRIPT_ID}-dynamic_range_zscore.png',bbox_inches='tight',transparent=False,dpi=800)

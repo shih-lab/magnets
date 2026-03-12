@@ -181,7 +181,7 @@ spearman_corr, _ = spearmanr(merged_df['TADA_median'], merged_df['PADDLE_median'
 
 g.text(-2.25,0.75,
         f"r  = {pearson_corr:.2f}\nρ = {spearman_corr:.2f}",
-        transform=ax.transAxes,
+        transform=g.transAxes,
         fontsize=8);
 
 if SAVE_FIGURES:

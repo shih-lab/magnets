@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from ete3 import Tree
@@ -11,7 +10,7 @@ from globals import (
 
 SCRIPT_ID = '06'
 
-# # output files for circos plot
+# output files for circos plot
 
 data_df = pd.read_csv(f'{ANALYSIS_DIR}/experimental_data_fitted.csv')
 x = data_df.groupby(['tax_id'])['tile_ID'].nunique()
@@ -33,7 +32,7 @@ for leaf in tree:
         leaf.name = family_mapper[leaf.name]
 tree.write(format=1, outfile=f"{METADATA_DIR}/ncbi_virus_tree_family.nwk")
 
-# # heatmaps
+# heatmaps
 
 background_aa_df = data_df['tile'].apply(lambda x: pd.Series(list(x))).reset_index().melt(id_vars='index',var_name='position',value_name='AA')
 background_attributes_df = background_aa_df.copy()

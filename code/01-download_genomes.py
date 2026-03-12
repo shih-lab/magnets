@@ -18,8 +18,9 @@ from globals import (
 _config = json.loads(os.environ.get("SCRIPT_CONFIG", "{}"))
 SCRIPT_ID = '01'
 
+download_metadata = _config.get("download_metadata", False)
 out_file = f'{VIRUS_DIR}/virus_metadata.csv'
-if not os.path.isfile(out_file):
+if download_metadata:
     cols = ["Genome","Accession","RefSeq type","Source information","Number of segments","Genome length","Number of proteins","Genome Neighbors","Host","Date completed","Date updated"]
     with open(f"{METADATA_DIR}/taxid10239.tbl", "r") as ncbi_file:
         lines = ncbi_file.readlines()[2:]
@@ -48,12 +49,11 @@ if not os.path.isfile(out_file):
     ncbi_df.to_csv(out_file,index=False)
 else:
     ncbi_df = pd.read_csv(out_file)
-ncbi_df.head()
 
 download_genomes = _config.get("download_genomes", False)
 if download_genomes:
     LEN_DF = len(ncbi_df)
-    t = trange(LEN_DF, desc='Bar desc', leave=True)
+    t = trange(LEN_DF, desc='Downloading genomes', leave=True)
     for i,row in ncbi_df.iterrows():
         accession = row['Accession']
         filename = row['Filename']
@@ -78,7 +78,7 @@ if convert_gbk:
             print("Converting %s" % seq_record.id)
             for seq_feature in seq_record.features :
                 if seq_feature.type == "CDS" :
-                    assert len(seq_feature.qualifiers['translation'])==1
+                    assert len(seq_feature.qualifiers['translation']) == 1
                     try: 
                         output_handle.write(f">{seq_feature.qualifiers['locus_tag'][0]} | {accession_map[seq_record.name]} | {seq_record.name}\n{seq_feature.qualifiers['translation'][0]}\n")
                     except:
@@ -91,8 +91,9 @@ if convert_gbk:
         convert_gbk_faa(gbk_filename,faa_filename)
     os.system(f'cat {GENOME_DIR}/*.faa > {VIRUS_DIR}/plant_viral_proteins.faa')
 
+scan_seq_clustering = _config.get("scan_seq_clustering", False)
 out_file = f'{ANALYSIS_DIR}/cdhit_clustering.csv'
-if not os.path.isfile(out_file):
+if scan_seq_clustering:
     out_dir = '../02-output/xx-sandbox/cd_hit'
     data = []
     faa_file = f'{VIRUS_DIR}/plant_viral_proteins.faa'
@@ -108,7 +109,6 @@ if not os.path.isfile(out_file):
     similarity_df.to_csv(out_file,index=False)
 else:
     similarity_df = pd.read_csv(out_file)
-similarity_df.head()
 
 fig = plt.figure(figsize=(6, 4))
 gs = gridspec.GridSpec(2, 3, figure=fig)
@@ -116,12 +116,10 @@ gs = gridspec.GridSpec(2, 3, figure=fig)
 ax1 = fig.add_subplot(gs[0, 0])
 ncbi_df = pd.read_csv(f'{VIRUS_DIR}/plant_virus_metadata.csv')
 g = sns.histplot(data=ncbi_df['Genome length'].astype(int),bins=25,element='step',alpha=0.6,edgecolor='black',ax=ax1,linewidth=0.5)
-print(ncbi_df['Genome length'].astype(int).median())
 g.set(ylabel='Number of genomes')
 
 ax2 = fig.add_subplot(gs[0, 1])
 g = sns.histplot(data=ncbi_df['Number of proteins'].replace('-',np.nan).dropna().astype(int),element='step',alpha=0.6,edgecolor='black',ax=ax2,linewidth=0.5)
-print(ncbi_df['Number of proteins'].replace('-',np.nan).dropna().astype(int).median())
 g.set(xlabel='Number of proteins',ylabel='Number of genomes')
 xmin,xmax = g.get_xlim()
 g.set(xlim=(-0.5,xmax))
@@ -130,7 +128,6 @@ g.xaxis.set_major_locator(MultipleLocator(5))
 ax3 = fig.add_subplot(gs[0, 2])
 df = fasta_to_dataframe(f'{VIRUS_DIR}/plant_viral_proteins.faa')
 g = sns.histplot(df['sequence'].apply(len),bins=25,element='step',edgecolor='black',alpha=0.6,ax=ax3,linewidth=0.5)
-print(df['sequence'].apply(len).median())
 g.set(yscale='log',xlabel='Protein length',ylabel='Number of proteins')
 g.xaxis.set_major_locator(MultipleLocator(2500))
 

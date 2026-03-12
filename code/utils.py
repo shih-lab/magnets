@@ -7,7 +7,6 @@ from tqdm import tqdm
 from collections import Counter
 from Bio.Seq import Seq
 import numpy as np
-from Bio.Seq import Seq
 from dnachisel import DnaOptimizationProblem, AvoidPattern, AvoidHairpins, EnforceGCContent, EnforceTranslation, CodonOptimize
 from scipy.optimize import curve_fit, root_scalar
 from scipy.stats import gaussian_kde
@@ -118,7 +117,7 @@ def filter_proteins(interpro_df, go_df, keyword):
     go_mask = interpro_df['Protein_ID'].isin(
         go_df[go_df['Description'].str.contains(keyword, case=False, na=False)]['protein_ID'].unique()
     )
-    filtered = interpro_df[keyword_mask | go_mask]
+    filtered = interpro_df[keyword_mask | go_mask].copy()
     filtered["Score"] = pd.to_numeric(filtered["Score"], errors="coerce")
     return filtered.loc[filtered.groupby("Protein_ID")["Score"].idxmin()]
 
@@ -212,18 +211,6 @@ def lookup_motif(curr_motif, experimental_tiles):
         if curr_motif in experimental_tile:
             counter += 1
     return counter
-
-def fasta_to_df(fasta):
-    fasta_records = []
-    fasta_sequences = SeqIO.parse(fasta, 'fasta')
-    for record in fasta_sequences:
-        fasta_records.append({
-            'id': record.id,
-            'description': record.description,
-            'seq': str(record.seq)
-        })
-    df = pd.DataFrame(fasta_records)
-    return df
 
 def protein_to_dna(protein_sequence):
     codon_table = {
@@ -349,9 +336,6 @@ def find_row_in_matrix(matrix, row):
     matches = np.where((matrix == row).all(axis=1))[0]
     return matches
 
-# def sigmoid_fit(x, L, x0, k, b):
-#     return L / (1 + np.exp(-k*(x - x0))) + b
-
 def sigmoid_fit(x, L, k, x0, b):
     exponent = -k * (x - x0)
     exponent = np.clip(exponent, -500, 500)  # avoid overflow
@@ -414,7 +398,6 @@ def fit_sigmoid(x_data,y_data):
     x_upper_bound_result = root_scalar(func_upper_bound, bracket=[x0, max(x_fit)], method='brentq')
     x_upper_bound = x_upper_bound_result.root if x_upper_bound_result.converged else None
 
-    print(x_upper_bound)
     return x_fit, y_fit, y_lower, y_upper, x_intercept, residual_std, x0, y_midpoint, x_upper_bound
 
 def get_taxid_from_accession(accession):

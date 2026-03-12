@@ -33,8 +33,6 @@ data_df = data_df.merge(synthesis_df,on='tile_ID')
 data_df = data_df.rename(columns={'protein_id':'protein_ID','tax_id':'taxonomy_ID','tile':'AA_seq','ncbi_id':'RefSeq_ID','zscore':'PADDLE_zscore','na_seq':'DNA_seq'})#.drop(columns=['log_cov_rep1','log_cov_rep2','ratio_rep3','coverage_rep3','log_cov_rep3'])
 data_df.loc[data_df['is_control'] == True,'taxonomy_ID'] = np.nan
 data_df.loc[data_df['is_control'] == True,'RefSeq_ID'] = np.nan
-data_df.loc[data_df['is_control'] == True,'taxonomy_ID'] = np.nan
-data_df.loc[data_df['is_control'] == True,'taxonomy_ID'] = np.nan
 data_df = data_df[['dataset','is_control','is_activator','RefSeq_ID','taxonomy_ID','protein_ID','tile_ID','AA_seq','PADDLE_zscore','ratio_rep1', 'coverage_rep1', 'ratio_rep2', 'coverage_rep2']]#.sort_values('dataset')
 data_df['dataset']=pd.Categorical(data_df['dataset'],categories=['250', '500', '1K','2K'])
 data_df = data_df.sort_values('dataset')

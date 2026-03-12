@@ -1,24 +1,9 @@
+import os
 import numpy as np
 import matplotlib as mpl
 import seaborn as sns
+import yaml
 from utils import create_dir
-
-# from ete3 import NCBITaxa
-# import matplotlib.gridspec as gridspec
-# import matplotlib.cm as cm
-# import matplotlib.colors as mcolors
-# from matplotlib_venn import venn3_unweighted, venn3_circles
-# import matplotlib.patches as patches
-# from sklearn.preprocessing import MinMaxScaler, StandardScaler
-# from scipy.stats import pearsonr, spearmanr
-# from matplotlib.ticker import MultipleLocator
-# from matplotlib.lines import Line2D
-# from glob import glob
-# from ete3 import NCBITaxa, Tree
-# from matplotlib_venn import venn2_unweighted,venn2_circles
-# from tqdm import trange
-# import matplotlib.pyplot as plt
-# ncbi = NCBITaxa()
 
 mpl.rcParams['font.family'] = 'Arial'
 sns.set_context("paper", rc={
@@ -56,15 +41,18 @@ for feature, amino_acids in FEATURE_DICT.items():
             AA_DICT[aa] = []
         AA_DICT[aa].append(feature)
 
-SAVE_FIGURES = True
+with open(os.path.join(os.path.dirname(__file__), "config.yml"), "r") as _f:
+    _config = yaml.safe_load(_f)
+    
+SAVE_FIGURES = _config.get("save_figures", True)
 FIG_PARAMS = dict(bbox_inches='tight',transparent=True,pad_inches=0)
 
-IN_DIR = '/data/01-input'
+IN_DIR = '../data/01-input'
 METADATA_DIR = f'{IN_DIR}/01-metadata'
 GENOME_DIR = f'{IN_DIR}/02-genomes'
 EXPERIMENT_DIR = f'{IN_DIR}/03-experiments'
 
-OUT_DIR = '/data/02-output'
+OUT_DIR = '../data/02-output'
 VIRUS_DIR = f'{OUT_DIR}/02-viruses'
 TILE_DIR = f'{OUT_DIR}/03-tiles'
 INFERENCE_DIR = f'{OUT_DIR}/04-inference'
@@ -72,6 +60,6 @@ LIBRARY_DIR = f'{OUT_DIR}/05-library'
 ANALYSIS_DIR = f'{OUT_DIR}/06-analysis'
 CONSTANS_DIR = f'{OUT_DIR}/07-constans'
 
-FIGURE_DIR = f'/results/01-figures'
+FIGURE_DIR = f'{OUT_DIR}/01-figures'
 for output_dir in [FIGURE_DIR]:
     create_dir(output_dir)

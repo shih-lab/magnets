@@ -1,4 +1,5 @@
 import os
+import json
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -9,20 +10,23 @@ from ete3 import NCBITaxa
 from utils import get_taxid_from_accession, calculate_mad
 from globals import (
     EXPERIMENT_DIR, LIBRARY_DIR, TILE_DIR, ANALYSIS_DIR,
-    METADATA_DIR, FIGURE_DIR, SAVE_FIGURES, FIG_PARAMS,
+    FIGURE_DIR, SAVE_FIGURES, FIG_PARAMS,
 )
 
-ncbi = NCBITaxa()
+_config = json.loads(os.environ.get("SCRIPT_CONFIG", "{}"))
 SCRIPT_ID = '04'
 
+import_empirical_data = _config.get("import_empirical_data", False)
 out_file = f'{EXPERIMENT_DIR}/magnetic_sorting_data.csv'
-if os.path.isfile(out_file):
-    data_df = None
+if import_empirical_data:
+    ncbi = NCBITaxa()
+    dfs = []
     for data_file in glob(f'{EXPERIMENT_DIR}/magnets/*_compiled_data.csv'):
-        id = data_file.split('/')[-1].replace('_compiled_data.csv','')
+        dataset_id = data_file.split('/')[-1].replace('_compiled_data.csv','')
         tmp_df = pd.read_csv(data_file,index_col=0)
-        tmp_df['dataset'] = id
-        data_df = pd.concat([data_df,tmp_df]).reset_index(drop=True)
+        tmp_df['dataset'] = dataset_id
+        dfs.append(tmp_df)
+    data_df = pd.concat(dfs).reset_index(drop=True)
     large_lib = pd.read_csv(f'{LIBRARY_DIR}/eLW044-fLW132.csv')
     mapper = dict(zip(large_lib['library_ID'],large_lib['tile_ID']))
     data_df['tileID'] = data_df['tileID'].replace(mapper)
@@ -57,7 +61,6 @@ if os.path.isfile(out_file):
     data_df.to_csv(out_file,index=False)
 else:
     data_df = pd.read_csv(out_file)
-data_df.head()
 
 data_df['ratio_mean'] = data_df[['ratio_rep1','ratio_rep2']].mean(axis=1)
 tmp_df = data_df.drop(columns=[
